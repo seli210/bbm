@@ -298,8 +298,21 @@
         </div>
     </div>
 
-    <script>
-        const params = new URLSearchParams(window.location.search);
+  <script>
+        // ---------------------------------------------------------
+        // الحل السحري لمشكلة الواتساب
+        // ---------------------------------------------------------
+        
+        // 1. نجيب الرابط كله
+        let queryString = window.location.search;
+
+        // 2. نبدل العلامة "الآمنة" (__) بالعلامة "الحقيقية" (&)
+        // الواتساب بيسمح بـ __ بس بيقص عند &
+        // فإحنا بنبعتها __ والكود هنا بيرجعها لأصلها
+        queryString = queryString.replace(/__/g, '&'); 
+
+        // 3. نكمل قراءة البيانات عادي جداً
+        const params = new URLSearchParams(queryString);
         const name = params.get('name');
         const id = params.get('id');
 
@@ -310,13 +323,12 @@
 
         if (name && id) {
             nameEl.innerText = name;
-            idEl.innerText = id; // مجرد الرقم عشان يبقى شكله زي الكود
+            idEl.innerText = id;
         } else {
+            // حالة الخطأ
             card.classList.add('error-mode');
-            nameEl.innerText = "UNREGISTERED";
-            idEl.innerText = "N/A";
-            idEl.style.background = "#333";
-            idEl.style.color = "#aaa";
+            nameEl.innerText = "بيانات غير متوفرة";
+            idEl.innerText = "---";
             statusBox.innerText = "Access Denied ❌";
         }
 
@@ -331,6 +343,7 @@
 
 
 </html>
+
 
 
 
