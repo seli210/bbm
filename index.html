@@ -5,139 +5,182 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تذكرة BBM - New Vision</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        :root { --gold: #C69C3A; --black: #050505; --success: #27ae60; --error: #c0392b; }
+        :root {
+            --gold: #C69C3A;
+            --black: #050505;
+            --success: #27ae60;
+            --error: #c0392b;
+        }
+
         * { box-sizing: border-box; }
+        
         body {
-            font-family: 'Cairo', sans-serif; background-color: var(--black); color: #fff;
-            display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 15px;
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--black);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 15px;
+            overflow: hidden;
+            position: relative;
         }
-        
-        /* ستايل التذكرة (زي ما هو) */
-        .bridge-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 60%; z-index: 0; opacity: 0.3; pointer-events: none; }
+
+        /* خلفية الجسور المتحركة */
+        .bridge-container {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 60%;
+            z-index: 0; pointer-events: none; opacity: 0.3;
+        }
+        .bridge-cable-1 {
+            position: absolute; bottom: -50px; left: -10%; width: 120%; height: 400px;
+            border-top: 3px solid var(--gold); border-radius: 50%;
+            animation: sway 8s ease-in-out infinite alternate;
+        }
+        .bridge-cable-2 {
+            position: absolute; bottom: -80px; left: -20%; width: 140%; height: 500px;
+            border-top: 2px dashed rgba(198, 156, 58, 0.5); border-radius: 50%;
+            animation: sway 12s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes sway {
+            0% { transform: translateY(0) scaleX(1); }
+            100% { transform: translateY(20px) scaleX(1.05); }
+        }
+
+        /* كارت التذكرة */
         .ticket-card {
-            background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(10px); width: 100%; max-width: 400px;
-            border-radius: 20px; border: 1px solid var(--gold); text-align: center; position: relative; z-index: 10;
-            display: none; /* مخفية افتراضياً */
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            width: 100%; max-width: 400px;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(198, 156, 58, 0.15);
+            border: 1px solid rgba(198, 156, 58, 0.3);
+            overflow: hidden; position: relative; text-align: center; z-index: 10;
         }
-        .ticket-active { display: block; }
-        .header { background: #000; padding: 20px; border-bottom: 2px solid var(--gold); display: flex; justify-content: center; gap: 15px; }
+
+        .header {
+            background: #000;
+            padding: 20px;
+            display: flex; justify-content: center; gap: 15px; align-items: center;
+            border-bottom: 2px solid var(--gold);
+        }
+
+        /* اللوجوهات */
         .logo { height: 60px; object-fit: contain; }
-        .nv-logo { height: 90px; }
+        .nv-logo { height: 90px; } /* حجم خاص للوجو نيوفيجن */
+
         .content { padding: 30px 20px; }
-        .user-name { font-size: 1.8rem; margin: 10px 0; font-weight: 700; }
-        .id-badge { background: var(--gold); color: #000; padding: 5px 25px; border-radius: 4px; font-weight: 900; font-size: 1.4rem; font-family: monospace; }
-        .status-box { border: 2px solid var(--success); color: var(--success); padding: 10px; border-radius: 10px; font-weight: bold; margin-bottom: 20px; }
-        .error-mode .status-box { border-color: var(--error); color: var(--error); }
-        
-        /* ستايل لوحة الأدمن (الجديد) */
-        .admin-panel {
-            background: #fff; color: #333; padding: 20px; border-radius: 10px; width: 100%; max-width: 600px;
-            display: none; z-index: 20; text-align: center;
+
+        .user-name {
+            font-size: 1.8rem; color: #fff; margin: 10px 0; font-weight: 700;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
-        .admin-active { display: block; }
-        textarea { width: 100%; height: 150px; margin: 10px 0; padding: 10px; direction: ltr; }
-        button { background: var(--gold); color: #000; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+
+        .id-badge {
+            background: linear-gradient(45deg, var(--gold), #8e6e1f);
+            color: #000; padding: 5px 25px; border-radius: 4px;
+            font-weight: 900; font-size: 1.4rem; display: inline-block;
+            margin-bottom: 30px; font-family: monospace;
+        }
+
+        .status-box {
+            border: 2px solid var(--success); color: var(--success);
+            background: rgba(39, 174, 96, 0.1); padding: 12px;
+            border-radius: 10px; font-size: 1.2rem; font-weight: bold;
+            margin-bottom: 25px; animation: pulseGlow 2s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 10px rgba(39, 174, 96, 0.1); }
+            50% { box-shadow: 0 0 25px rgba(39, 174, 96, 0.4); }
+            100% { box-shadow: 0 0 10px rgba(39, 174, 96, 0.1); }
+        }
+
+        .live-clock {
+            font-family: monospace; font-size: 1.1rem; color: #aaa;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 15px; display: inline-block; width: 100%;
+        }
+
+        /* Error Mode */
+        .error-mode { border-color: var(--error); }
+        .error-mode .status-box {
+            border-color: var(--error); color: var(--error);
+            background: rgba(192, 57, 43, 0.1); animation: none;
+        }
     </style>
 </head>
 <body>
 
-    <div class="ticket-card" id="card">
-        <div class="header">
-            <img src="logo_nv.png" alt="NV" class="logo nv-logo">
-            <img src="logo_bbm.png" alt="BBM" class="logo">
-        </div>
-        <div class="content">
-            <h1 class="user-name" id="userName">...</h1>
-            <div class="id-badge" id="userId">...</div>
-            <div class="status-box" id="statusBox">Access Granted ✅</div>
-            <div id="clock" style="color:#aaa; font-family:monospace;">00:00:00</div>
-        </div>
+    <div class="bridge-container">
+        <div class="bridge-cable-2"></div>
+        <div class="bridge-cable-1"></div>
     </div>
 
-    <div class="admin-panel" id="adminPanel">
-        <h2>🛠️ مولد اللينكات السحري</h2>
-        <p>انسخ عمود الأسماء وعمود الـ ID من الإكسل وحطهم هنا</p>
-        <p style="font-size: 12px; color: #666;">(الاسم في سطر، والـ ID جنبه بمسافة أو Tab)</p>
-        <textarea id="inputData" placeholder="Example:
-Ahmed Ali	101
-Mona Sayed	102"></textarea>
-        <button onclick="generateLinks()">Generate Links 🚀</button>
-        <div id="outputLinks" style="margin-top: 20px; text-align: left; max-height: 200px; overflow-y: scroll; background: #eee; padding: 10px;"></div>
+    <div class="ticket-card" id="card">
+        <div class="header">
+            <img src="logo_nv.png" alt="New Vision" class="logo nv-logo"> 
+            <img src="logo_bbm.png" alt="BBM" class="logo"> 
+        </div>
+
+        <div class="content">
+            <h1 class="user-name" id="userName">جاري التحميل...</h1>
+            <div class="id-badge" id="userId">...</div>
+
+            <div class="status-box" id="statusBox">
+                Access Granted ✅
+            </div>
+
+            <div class="live-clock">
+                <span id="clock">00:00:00</span>
+            </div>
+        </div>
     </div>
 
     <script>
-        // 1. تحديد الوضع (تذكرة ولا أدمن؟)
-        const params = new URLSearchParams(window.location.search);
-        
-        if (params.get('admin') === 'true') {
-            document.getElementById('adminPanel').classList.add('admin-active');
-        } else {
-            document.getElementById('card').classList.add('ticket-active');
-            checkTicket();
-        }
+        // --- Joker Script V2.0 ---
+        // بيستقبل ?data=Name__ID ويفكها
+        function getParams() {
+            const searchParams = new URLSearchParams(window.location.search);
+            const dataParam = searchParams.get('data');
 
-        // --- كود التذكرة (The Joker Script V3) ---
-        function checkTicket() {
-            const data = params.get('data');
-            const nameEl = document.getElementById('userName');
-            const idEl = document.getElementById('userId');
-            const status = document.getElementById('statusBox');
-            const card = document.getElementById('card');
+            if (!dataParam) return { name: null, id: null };
 
-            if (data && data.includes('__')) {
-                const parts = data.split('__');
-                nameEl.innerText = parts[0].replace(/%20/g, ' '); // تصليح المسافات
-                idEl.innerText = parts[1];
-            } else {
-                // تجربة يدوية (Test)
-                if (data === 'test') {
-                     nameEl.innerText = "Test User"; idEl.innerText = "000"; return;
-                }
-                card.classList.add('error-mode');
-                nameEl.innerText = "بيانات غير متوفرة";
-                idEl.innerText = "---";
-                status.innerText = "Access Denied ❌";
+            // بيفصل عند الشرطتين __
+            if (dataParam.includes('__')) {
+                const parts = dataParam.split('__');
+                return { name: parts[0], id: parts[1] };
             }
-        }
-
-        // --- كود الأدمن (توليد اللينكات) ---
-        function generateLinks() {
-            const input = document.getElementById('inputData').value.trim();
-            const lines = input.split('\n');
-            let output = "<h3>خد اللينكات دي كوبي ووزعها:</h3>";
             
-            lines.forEach(line => {
-                // بنفصل الاسم عن الرقم (بيفصل بالمسافة اللي بينهم)
-                // لو الاسم مركب، بناخد آخر جزء كرقم
-                let parts = line.trim().split(/\t|    |  /); // بيفصل بالـ Tab أو المسافات الكبيرة
-                if (parts.length < 2) parts = line.trim().split(' '); // محاولة فصل بمسافة عادية
-
-                // افتراض: آخر حاجة هي الـ ID، وكل اللي قبلها هو الاسم
-                const id = parts.pop(); 
-                const name = parts.join(' ');
-
-                if (name && id) {
-                    // تصليح المسافات في الاسم للينك
-                    const cleanName = name.trim();
-                    const linkName = cleanName.replace(/ /g, '%20'); 
-                    const fullLink = `https://seli210.github.io/bbm/?data=${linkName}__${id}`;
-                    
-                    output += `<div style="margin-bottom:10px; border-bottom:1px solid #ccc; padding-bottom:5px;">
-                        <strong>${cleanName}:</strong><br>
-                        <a href="${fullLink}" target="_blank">${fullLink}</a><br>
-                        <a href="https://wa.me/?text=${fullLink}" style="color:green; font-weight:bold; text-decoration:none;">[Send WhatsApp 📲]</a>
-                    </div>`;
-                }
-            });
-            document.getElementById('outputLinks').innerHTML = output;
+            return { name: null, id: null };
         }
 
-        // الساعة
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-US');
-        }, 1000);
+        // تنفيذ الكود
+        const result = getParams();
+        const nameEl = document.getElementById('userName');
+        const idEl = document.getElementById('userId');
+        const statusBox = document.getElementById('statusBox');
+        const card = document.getElementById('card');
+
+        if (result.name && result.id) {
+            // فك تشفير الاسم (عشان الـ %20 ترجع مسافة)
+            nameEl.innerText = decodeURIComponent(result.name);
+            idEl.innerText = result.id;
+        } else {
+            card.classList.add('error-mode');
+            nameEl.innerText = "بيانات غير متوفرة";
+            idEl.innerText = "---";
+            statusBox.innerText = "Access Denied ❌";
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
     </script>
 </body>
 </html>
