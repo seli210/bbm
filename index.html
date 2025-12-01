@@ -298,83 +298,58 @@
         </div>
     </div>
 
- <script>
-        // --- Joker Script V1.0 ---
-        // بيحاول يقرا البيانات بكل الطرق الممكنة عشان يتفادى مشاكل الواتساب والكاش
-
+<script>
+        // --- Joker Script V2.0 (The Fix) ---
         function getParams() {
-            const url = window.location.href;
             const searchParams = new URLSearchParams(window.location.search);
-            let name = null;
-            let id = null;
-
-            // محاولة 1: الطريقة الموحدة (Data Blob) - أحدث طريقة
-            // ?data=Name--ID
             const dataParam = searchParams.get('data');
-            if (dataParam && dataParam.includes('--')) {
+
+            // لو مفيش داتا خالص
+            if (!dataParam) return { name: null, id: null };
+
+            // نجرب نفصل بـ "شرطتين تحت السطر" (ده الجديد والأضمن)
+            if (dataParam.includes('__')) {
+                const parts = dataParam.split('__');
+                return { name: parts[0], id: parts[1] };
+            }
+            
+            // نجرب نفصل بـ "شرطتين عاديتين" (للاحتياط)
+            if (dataParam.includes('--')) {
                 const parts = dataParam.split('--');
-                return { name: parts[0], id: parts[1], method: 'Data Blob' };
+                return { name: parts[0], id: parts[1] };
             }
 
-            // محاولة 2: الطريقة التقليدية
-            // ?name=X&id=Y
-            if (searchParams.has('name') && searchParams.has('id')) {
-                return { name: searchParams.get('name'), id: searchParams.get('id'), method: 'Standard' };
+            // لو ملقاش فواصل، نحاول نفصل آخر أرقام ونعتبرها هي الـ ID
+            // دي خطة الطوارئ لو العلامات اتمسحت
+            const match = dataParam.match(/(.*?)(\d+)$/);
+            if (match) {
+                return { name: match[1], id: match[2] };
             }
 
-            // محاولة 3: خدعة الواتساب (إصلاح الشرطتين)
-            // ?name=X__id=Y
-            if (url.includes('__id=')) {
-                // بنفك اللينك يدوياً عشان لو البراوزر مفهموش
-                try {
-                    const splitUrl = url.split('?')[1]; // هات اللي بعد علامة الاستفهام
-                    // دور على الاسم
-                    const nameMatch = splitUrl.match(/name=([^&_]+)/);
-                    // دور على الـ ID (سواء قبله & أو __)
-                    const idMatch = splitUrl.match(/(?:&|__)id=([^&]+)/);
-                    
-                    if (nameMatch && idMatch) {
-                        // فك التشفير (زي %20 للمسافات)
-                        return { 
-                            name: decodeURIComponent(nameMatch[1]), 
-                            id: decodeURIComponent(idMatch[1]), 
-                            method: 'Manual Regex' 
-                        };
-                    }
-                } catch (e) {
-                    console.log('Regex parsing failed', e);
-                }
-            }
-
-            return { name: null, id: null, method: 'Failed' };
+            return { name: null, id: null };
         }
 
         // تنفيذ الكود
         const result = getParams();
+        
+        // باقي الكود زي ما هو بالظبط...
         const nameEl = document.getElementById('userName');
         const idEl = document.getElementById('userId');
         const statusBox = document.getElementById('statusBox');
         const card = document.getElementById('card');
 
-        // طباعة رسالة فنية عشان نعرف إيه اللي بيوصل للموقع (Debug)
-        // امسح السطرين دول بعد ما تطمن إن الموقع اشتغل
-        const debugDiv = document.createElement('div');
-        debugDiv.style.cssText = "font-size:10px; color:#555; margin-top:10px; font-family:monospace;";
-        debugDiv.innerText = `System Log: ${result.method} | URL: ${window.location.search.substring(0, 30)}...`;
-        document.querySelector('.content').appendChild(debugDiv);
+        // دي عشان لو حبيت تشوف الصورة الجديدة للوجو (webp)
+        // document.querySelector('.nv-logo').src = "logo_nv.webp"; 
 
         if (result.name && result.id) {
-            nameEl.innerText = result.name;
+            // بنشيل أي علامات %20 ونرجعها مسافات عشان الاسم يبقى شكله حلو
+            nameEl.innerText = decodeURIComponent(result.name);
             idEl.innerText = result.id;
         } else {
             card.classList.add('error-mode');
             nameEl.innerText = "بيانات غير متوفرة";
             idEl.innerText = "---";
             statusBox.innerText = "Access Denied ❌";
-            
-            // لو فشل، اكتبلنا السبب بالظبط
-            debugDiv.style.color = 'red';
-            debugDiv.innerText += " | Error: Params missing";
         }
 
         function updateTime() {
@@ -388,6 +363,7 @@
 
 
 </html>
+
 
 
 
