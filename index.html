@@ -299,51 +299,40 @@
     </div>
 
 <script>
-        // --- Joker Script V2.0 (The Fix) ---
+        // --- Smart Hyphen Script V3.0 ---
+        // اللينك بييجي كده: ?data=Ahmed-Mohamed-Ali-105
+        // الكود بياخد آخر جزء يعتبره ID، والباقي يعتبره الاسم
+        
         function getParams() {
             const searchParams = new URLSearchParams(window.location.search);
-            const dataParam = searchParams.get('data');
+            let rawData = searchParams.get('data');
 
-            // لو مفيش داتا خالص
-            if (!dataParam) return { name: null, id: null };
+            if (!rawData) return { name: null, id: null };
 
-            // نجرب نفصل بـ "شرطتين تحت السطر" (ده الجديد والأضمن)
-            if (dataParam.includes('__')) {
-                const parts = dataParam.split('__');
-                return { name: parts[0], id: parts[1] };
-            }
-            
-            // نجرب نفصل بـ "شرطتين عاديتين" (للاحتياط)
-            if (dataParam.includes('--')) {
-                const parts = dataParam.split('--');
-                return { name: parts[0], id: parts[1] };
-            }
+            // 1. لو اللينك فيه مسافات أو %20 (جاي من إكسل قديم)، حولها لشرط عشان نوحد التعامل
+            rawData = rawData.replace(/%20/g, '-').replace(/ /g, '-').replace(/_/g, '-');
 
-            // لو ملقاش فواصل، نحاول نفصل آخر أرقام ونعتبرها هي الـ ID
-            // دي خطة الطوارئ لو العلامات اتمسحت
-            const match = dataParam.match(/(.*?)(\d+)$/);
-            if (match) {
-                return { name: match[1], id: match[2] };
-            }
+            // 2. نفصل الكلام بناء على الشرطة "-"
+            const parts = rawData.split('-');
 
-            return { name: null, id: null };
+            // 3. آخر حتة هي الـ ID
+            const id = parts.pop(); 
+
+            // 4. الباقي كله هو الاسم (بنجمعه تاني بمسافات)
+            const name = parts.join(' ');
+
+            return { name: name, id: id };
         }
 
         // تنفيذ الكود
         const result = getParams();
-        
-        // باقي الكود زي ما هو بالظبط...
         const nameEl = document.getElementById('userName');
         const idEl = document.getElementById('userId');
         const statusBox = document.getElementById('statusBox');
         const card = document.getElementById('card');
 
-        // دي عشان لو حبيت تشوف الصورة الجديدة للوجو (webp)
-        // document.querySelector('.nv-logo').src = "logo_nv.webp"; 
-
         if (result.name && result.id) {
-            // بنشيل أي علامات %20 ونرجعها مسافات عشان الاسم يبقى شكله حلو
-            nameEl.innerText = decodeURIComponent(result.name);
+            nameEl.innerText = result.name;
             idEl.innerText = result.id;
         } else {
             card.classList.add('error-mode');
@@ -360,9 +349,9 @@
         updateTime();
     </script>
 </body>
-
-
 </html>
+
+
 
 
 
