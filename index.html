@@ -298,30 +298,26 @@
         </div>
     </div>
 
-  <script>
-        // ---------------------------------------------------------
-        // الحل السحري لمشكلة الواتساب
-        // ---------------------------------------------------------
+ <script>
+        // الحل النهائي: استقبال البيانات ككتلة واحدة (Data Blob)
+        const params = new URLSearchParams(window.location.search);
         
-        // 1. نجيب الرابط كله
-        let queryString = window.location.search;
-
-        // 2. نبدل العلامة "الآمنة" (__) بالعلامة "الحقيقية" (&)
-        // الواتساب بيسمح بـ __ بس بيقص عند &
-        // فإحنا بنبعتها __ والكود هنا بيرجعها لأصلها
-        queryString = queryString.replace(/__/g, '&'); 
-
-        // 3. نكمل قراءة البيانات عادي جداً
-        const params = new URLSearchParams(queryString);
-        const name = params.get('name');
-        const id = params.get('id');
+        // بندور على حاجة اسمها data
+        // اللينك هيكون كده: ?data=AhmedAli--123
+        const rawData = params.get('data'); 
 
         const nameEl = document.getElementById('userName');
         const idEl = document.getElementById('userId');
         const statusBox = document.getElementById('statusBox');
         const card = document.getElementById('card');
 
-        if (name && id) {
+        // نتأكد إن الداتا وصلت
+        if (rawData && rawData.includes('--')) {
+            // نفك الشفرة: اللي قبل الشرطتين هو الاسم، واللي بعدهم هو الـ ID
+            const parts = rawData.split('--'); 
+            const name = parts[0];
+            const id = parts[1];
+
             nameEl.innerText = name;
             idEl.innerText = id;
         } else {
@@ -330,6 +326,10 @@
             nameEl.innerText = "بيانات غير متوفرة";
             idEl.innerText = "---";
             statusBox.innerText = "Access Denied ❌";
+            
+            // سطر زيادة عشان تعرف المشكلة فين (Debugging)
+            // هيظهرلك اللينك اللي الموقع شايفه عشان تعرف الغلطة فين
+            console.log("Received: ", rawData);
         }
 
         function updateTime() {
@@ -343,6 +343,7 @@
 
 
 </html>
+
 
 
 
